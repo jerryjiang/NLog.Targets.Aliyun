@@ -1,6 +1,11 @@
 # NLog Target for Aliyun Log Service
 
-## Steps
+A .NET Core NLog target to send log message to Aliyun Log Service.
+
+## Install via NuGet
+    Install-Package NLog.Targets.Aliyun
+
+## Steps to Configure
 1. Create a Log Service project and logstore
 2. Enable RAM access control and create an AccessKey
 3. Endpoint, project, accessKeyId and accessKey does not support layout rendering
