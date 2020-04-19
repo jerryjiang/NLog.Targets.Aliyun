@@ -7,10 +7,10 @@
     <Authors>Jerry Jiang</Authors>
     <Version>1.0.0</Version>
     <PackageProjectUrl>https://github.com/jerryjiang/nlog.targets.aliyun</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/jerryjiang/nlog.targets.aliyun/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>NLog;Aliyun</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/jerryjiang/nlog.targets.aliyun.git</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
