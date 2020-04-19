@@ -76,21 +76,10 @@ namespace NLog.Targets.Aliyun
 
             var topic = GetTopic(Topic, logEvent);
             var source = GetSource(Source, logEvent);
-            var message = RenderLogEvent(Layout, logEvent) ?? string.Empty;
-            var contents = new Dictionary<string, string>
-            {
-                { "message", message },
-                // TODO: There are pros and cons to add the following fields.
-                { "level", logEvent.Level.Name },
-                { "sequenceId", logEvent.SequenceID.ToString() }
-            };
+            var contents = new Dictionary<string, string>();
+            var includeProperties = ShouldIncludeProperties(logEvent);
 
-            if (null != logEvent.Exception)
-            {
-                contents.Add("exception", logEvent.Exception.ToString());
-            }
-
-            if (ShouldIncludeProperties(logEvent))
+            if (includeProperties)
             {
                 var properties = GetAllProperties(logEvent);
 
@@ -109,26 +98,42 @@ namespace NLog.Targets.Aliyun
             }
             else
             {
-                for (int i = 0; i < ContextProperties.Count; ++i)
+                foreach (var property in ContextProperties)
                 {
-                    var contextKey = ContextProperties[i].Name;
-
-                    if (string.IsNullOrEmpty(contextKey))
+                    if (string.IsNullOrEmpty(property.Name))
                     {
                         continue;
                     }
 
-                    var contextValue = RenderLogEvent(ContextProperties[i].Layout, logEvent);
+                    var content = RenderLogEvent(property.Layout, logEvent);
 
-                    if (string.IsNullOrEmpty(contextValue) && !ContextProperties[i].IncludeEmptyValue)
+                    if (string.IsNullOrWhiteSpace(content) && !property.IncludeEmptyValue)
                     {
                         continue;
                     }
 
-                    if (!contents.ContainsKey(contextKey))
+                    if (!contents.ContainsKey(property.Name))
                     {
-                        contents.Add(contextKey, contextValue);
+                        contents.Add(property.Name, content);
                     }
+                }
+            }
+
+            if (!includeProperties && ContextProperties.Count == 0)
+            {
+                var message = RenderLogEvent(Layout, logEvent) ?? string.Empty;
+
+                // In the case that no property was set, fallback to default configuration.
+                contents = new Dictionary<string, string>
+                {
+                    { "message", message },
+                    { "level", logEvent.Level.Name },
+                    { "sequence", logEvent.SequenceID.ToString() }
+                };
+
+                if (null != logEvent.Exception)
+                {
+                    contents.Add("exception", logEvent.Exception.ToString());
                 }
             }
 
@@ -150,7 +155,7 @@ namespace NLog.Targets.Aliyun
             {
                 topic = RenderLogEvent(topic, logEvent);
             }
-            else
+            else if (null == topic)
             {
                 topic = logEvent.LoggerName;
             }
@@ -168,7 +173,7 @@ namespace NLog.Targets.Aliyun
                 {
                     source = RenderLogEvent(source, logEvent);
                 }
-                else
+                else if (null == source)
                 {
                     source = Dns.GetHostName();
 

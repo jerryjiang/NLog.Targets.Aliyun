@@ -8,25 +8,25 @@ A .NET Core NLog target to send log message to Aliyun Log Service.
 ## Steps to Configure
 1. Create a Log Service project and logstore
 2. Enable RAM access control and create an AccessKey
-3. Endpoint, project, accessKeyId and accessKey does not support layout rendering
-4. When use layout rendering for logStore, make sure you created the specified logstore in SLS portal
-5. In the example below, the log will send to development, staging or production logstore depends on the environment, but logs without the context will be dropped
-6. Source will default to Local IP address if not set
-7. Topic will default to logger name if not set
+3. Add **NLog.Targets.Aliyun** as an extension to your nlog.config
+4. Configure endpoint, project, accessKeyId and accessKey in the nlog.config
+5. Specify the logstore you want the log post to
+   
+   e.g., set logStore="\${lowercase:\${aspnet-environment}}", the log will send to **development**, **staging** or **production** logstore depends on the environment, some initialization logs will be dropped as environment not set yet
 
 ## Supported Configuration
 
-- **name** - _Specify a name, but make sure you use the same name in logger rules section_
-- **endpoint** - _You can find it in the home screnn of your log service project. Use external endpoint if your application is not deployed within Aliyun_
-- **project** - _The log service project name you specified_
-- **accessKeyId** - _The RAM access key id_
-- **accessKey** - _The RAM access key_
-- **logStore** - _The log service log store anem you specified_
-- **source** - _Leave this as empty or remove this attribute will send the IP address the application are running_
-- **topic** - _Leave this empty or remove this attribute will send the logger name_
-- **layout** - _The message layout_
+- _**name**_ - Specify a name, but make sure you use the same name in logger rules section
+- _**endpoint**_ - You can find it in the home screnn of your log service project. Use external endpoint if your application is not deployed within Aliyun
+- _**project**_ - The log service project name you specified
+- _**accessKeyId**_ - The RAM access key id
+- _**accessKey**_ - The RAM access key
+- _**logStore**_ - Support layout rendering, the log service log store name you specified
+- _**source**_ - Support layout rendering, leave as empty send nothing to server while remove this attribute will send the IP address the application are running
+- _**topic**_ - Support layout rendering, leave as empty send nothing to server while remove this attribute will send the logger name
+- _**layout**_ - The message layout, this property will be ignored when context properties is set
 
-## Configuration Example
+## Configuration Examples
 
 - Add NLog.Targets.Aliyun Extension
 
@@ -35,18 +35,20 @@ A .NET Core NLog target to send log message to Aliyun Log Service.
 - Add Aliyun Target
 
         <target xsi:type="Aliyun" name="aliyun"
-                endpoint="<your sls endpoint>"
-                project="<your project name>"
-                accessKeyId="<your accessKeyId>"
-                accessKey="<your accessKey>"
-                logStore="${lowercase:${aspnet-environment}}"
-                source="<anything you want>"
-                topic="<anything you want>"
-                layout="${longdate} | ${message} | ${exception:format=ToString,StackTrace}"
-        />
+                endpoint="<your-endpoint>"
+                project="<your-project-name>"
+                accessKeyId="<your-access-key-id>"
+                accessKey="<your-access-key>"
+                logStore="<your-log-store-name>">
+            <contextProperty name="time" layout="${longdate}" />
+            <contextProperty name="level" layout="${level}" />
+            <contextProperty name="sequence" layout="${sequenceId}" />
+            <contextProperty name="message" layout="${message}" />
+            <contextProperty name="exception" layout="${exception:format=ToString,StackTrace}" includeEmptyValue="false" />
+        </target>
 
 - Add Logger Rules
 
         <logger name="*" minlevel="Debug" writeTo="aliyun" />
 
-See [full example](demo/NLog.config) in the demo project.
+See a [full example](demo/NLog.config) in the demo project.
