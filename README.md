@@ -29,11 +29,12 @@ A .NET Core NLog target to send log message to Aliyun Log Service.
 ## Configuration Examples
 
 - Add NLog.Targets.Aliyun Extension
-
+```xml
         <add assembly="NLog.Targets.Aliyun"/>
+```
 
 - Add Aliyun Target
-
+```xml
         <target xsi:type="Aliyun" name="aliyun"
                 endpoint="<your-endpoint>"
                 project="<your-project-name>"
@@ -46,9 +47,11 @@ A .NET Core NLog target to send log message to Aliyun Log Service.
             <contextProperty name="message" layout="${message}" />
             <contextProperty name="exception" layout="${exception:format=ToString,StackTrace}" includeEmptyValue="false" />
         </target>
+```
 
 - Add Logger Rules
-
+```xml
         <logger name="*" minlevel="Debug" writeTo="aliyun" />
+```
 
 See a [full example](demo/NLog.config) in the demo project.
